@@ -10,6 +10,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Opt in to Node.js 24 for JS-based actions (actions/checkout, etc.) ahead of
+  # the 2026-06-02 forced upgrade.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: ${{ matrix.name }}
@@ -68,7 +73,7 @@ jobs:
 
       - name: Install macOS deps
         if: runner.os == 'macOS'
-        run: brew install ninja
+        run: command -v ninja >/dev/null 2>&1 || brew install ninja
 
       - name: Configure (Unix)
         if: runner.os != 'Windows'
