@@ -1,0 +1,13 @@
+build/
+build-*/
+cmake-build-*/
+out/
+*.user
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+compile_commands.json
+*.xml
+!cmake/*.xml
+!.github/**/*.xml
