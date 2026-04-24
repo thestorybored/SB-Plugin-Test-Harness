@@ -7,6 +7,12 @@
 #include <initializer_list>
 
 #if defined(_WIN32)
+ #ifndef WIN32_LEAN_AND_MEAN
+  #define WIN32_LEAN_AND_MEAN
+ #endif
+ #ifndef NOMINMAX
+  #define NOMINMAX
+ #endif
  #include <windows.h>
  #include <dbghelp.h>
  #pragma comment(lib, "dbghelp.lib")
@@ -36,7 +42,7 @@ namespace {
         const auto proc  = GetCurrentProcess();
         SymInitialize(proc, nullptr, TRUE);
 
-        char buf[sizeof(SYMBOL_INFO) + 256];
+        alignas(SYMBOL_INFO) char buf[sizeof(SYMBOL_INFO) + 256];
         auto* sym = reinterpret_cast<SYMBOL_INFO*>(buf);
         sym->MaxNameLen   = 255;
         sym->SizeOfStruct = sizeof(SYMBOL_INFO);
