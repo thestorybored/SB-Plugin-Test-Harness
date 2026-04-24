@@ -97,6 +97,16 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(plugin-harness PRIVATE dl)
 endif()
 
+if(APPLE)
+    # juce_audio_processors's AU hosting code references AUGenericView from
+    # CoreAudioKit but only auto-links it when building plugins, not when
+    # hosting them. Add it explicitly so the link succeeds when
+    # JUCE_PLUGINHOST_AU=1.
+    target_link_libraries(plugin-harness PRIVATE
+        "-framework CoreAudioKit"
+        "-framework AudioUnit")
+endif()
+
 harness_apply_sanitizers(plugin-harness)
 harness_apply_warnings(plugin-harness)
 
