@@ -28,7 +28,8 @@ jobs:
             install_deps: true
           - name: linux-release
             os: ubuntu-22.04
-            cmake_flags: "-DCMAKE_BUILD_TYPE=Release -DHARNESS_BUILD_TESTS=ON"
+            cmake_flags: "-DHARNESS_BUILD_TESTS=ON"
+            build_type: Release
             install_deps: true
           - name: macos-asan-ubsan
             os: macos-14
@@ -60,29 +61,39 @@ jobs:
 
       - name: Configure (Unix)
         if: runner.os != 'Windows'
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug ${{ matrix.cmake_flags }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type || 'Debug' }}
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE ${{ matrix.cmake_flags }}
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug ${{ matrix.cmake_flags }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type || 'Debug' }}
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE ${{ matrix.cmake_flags }}
 
       - name: Build
-        run: cmake --build build --config Debug
+        run: cmake --build build --config ${{ matrix.build_type || 'Debug' }} --verbose
 
       - name: Smoke test (Unix)
         if: runner.os != 'Windows'
+        env:
+          BUILD_TYPE: ${{ matrix.build_type || 'Debug' }}
         run: |
-          ./build/plugin-harness_artefacts/Debug/plugin-harness --version
-          ./build/plugin-harness_artefacts/Debug/plugin-harness --list-scenarios
-          ./build/plugin-harness_artefacts/Debug/plugin-harness --list-formats
+          BIN=./build/plugin-harness_artefacts/$BUILD_TYPE/plugin-harness
+          $BIN --version
+          $BIN --list-scenarios
+          $BIN --list-formats
 
       - name: Smoke test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        env:
+          BUILD_TYPE: ${{ matrix.build_type || 'Debug' }}
         run: |
-          & "build/plugin-harness_artefacts/Debug/plugin-harness.exe" --version
-          & "build/plugin-harness_artefacts/Debug/plugin-harness.exe" --list-scenarios
-          & "build/plugin-harness_artefacts/Debug/plugin-harness.exe" --list-formats
+          $bin = "build/plugin-harness_artefacts/$env:BUILD_TYPE/plugin-harness.exe"
+          & $bin --version
+          & $bin --list-scenarios
+          & $bin --list-formats
 
       - name: Run self-tests
-        run: ctest --test-dir build --output-on-failure -C Debug
+        run: ctest --test-dir build --output-on-failure -C ${{ matrix.build_type || 'Debug' }}

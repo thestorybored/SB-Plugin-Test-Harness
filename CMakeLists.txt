@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
+if(CMAKE_HOST_APPLE)
+    set(_HARNESS_LANGS CXX C OBJC OBJCXX)
+else()
+    set(_HARNESS_LANGS CXX C)
+endif()
+
 project(SBPluginTestHarness
         VERSION 0.1.0
         DESCRIPTION "StoryBored multi-instance plugin lifecycle test harness"
-        LANGUAGES CXX C)
+        LANGUAGES ${_HARNESS_LANGS})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -64,9 +70,15 @@ target_sources(plugin-harness PRIVATE
 
 target_include_directories(plugin-harness PRIVATE src)
 
+if(APPLE)
+    set(_HARNESS_AU 1)
+else()
+    set(_HARNESS_AU 0)
+endif()
+
 target_compile_definitions(plugin-harness PRIVATE
     JUCE_PLUGINHOST_VST3=1
-    JUCE_PLUGINHOST_AU=$<IF:$<PLATFORM_ID:Darwin>,1,0>
+    JUCE_PLUGINHOST_AU=${_HARNESS_AU}
     JUCE_PLUGINHOST_LADSPA=0
     JUCE_PLUGINHOST_LV2=0
     JUCE_USE_CURL=0
