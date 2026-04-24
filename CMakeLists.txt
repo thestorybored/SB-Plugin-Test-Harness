@@ -88,6 +88,9 @@ endif()
 harness_apply_sanitizers(plugin-harness)
 harness_apply_warnings(plugin-harness)
 
+# So backtrace_symbols() can resolve our own functions, not just hex offsets.
+set_target_properties(plugin-harness PROPERTIES ENABLE_EXPORTS ON)
+
 # -----------------------------------------------------------------------------
 # Tests
 # -----------------------------------------------------------------------------
