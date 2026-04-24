@@ -46,6 +46,17 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Toolchain info
+        shell: bash
+        run: |
+          uname -a
+          cmake --version | head -1
+          which ninja >/dev/null 2>&1 && ninja --version || true
+          ${CC:-gcc} --version 2>/dev/null | head -1 || true
+          ${CXX:-g++} --version 2>/dev/null | head -1 || true
+          clang --version 2>/dev/null | head -1 || true
+          test -d external/JUCE && (cd external/JUCE && git describe --tags --always) || echo "JUCE submodule MISSING"
+
       - name: Install Linux deps
         if: matrix.install_deps
         run: |
